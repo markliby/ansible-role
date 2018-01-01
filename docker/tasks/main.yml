@@ -1,0 +1,4 @@
+---
+- include: install.yml
+- include: docker-compose.yml
+  when: docker_install_compose

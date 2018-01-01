@@ -1,0 +1,20 @@
+---
+- name: check docker-compose version
+  shell: docker-compose --version
+  register: docker_compose_current_version
+  change_when: false
+  failed_when: false
+
+- name: delete old docker-compose version
+  file:
+    path: /usr/local/bin/docker-compose
+    state: absent
+  when: >
+    docker_compose_current_version.stdout is defined
+    and docker_compose_version not in docker_compose_current_version.stdout
+
+- name: install docker compose
+  get_url:
+    url: https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64
+    dest: /usr/local/bin/docker-compose
+    mode: 0755

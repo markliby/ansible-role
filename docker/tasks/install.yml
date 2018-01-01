@@ -1,0 +1,32 @@
+---
+- name: Remove old versions of Docker
+  package:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - docker
+    - docker-common
+    - docker-engine
+
+- name: Add Docker GPG key
+  rpm_key:
+    state: present
+    key: https://download.docker.com/linux/centos/gpg
+
+- name: install Docker repo
+  get_url:
+    url: "https://download.docker.com/linux/centos/docker-ce.repo"
+    dest: "/etc/yum.repos.d/docker-ce.repo"
+    mode: 0644
+
+- name: install Docker
+  yum:
+    name: docker-ce
+    state: present
+
+- name: Docker is started at boot
+  service:
+    name: docker
+    state: started
+    enabled: yes
+

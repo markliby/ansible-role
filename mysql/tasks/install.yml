@@ -1,0 +1,37 @@
+---
+- name: install mysql
+  yum:
+    name: "{{ item }}"
+    state: installed
+    enablerepo: https://dev.mysql.com/get/mysql57-community-release-el7-11.noarch.rpm
+  with_items: "{{ mysql_packages }}"
+  register: mysql_install_packages
+  when: ansible_os_family == "RedHat"
+  
+- name: start mysql
+  service:
+    name: mysql
+    state: present
+    enabled: yes
+
+- name: install mysql script
+  shell: /bin/bash /tmp/install_mysql.sh
+  when: ansible_os_family == "RedHat"
+
+- name: check mysql service avaiable
+  shell: "mysql -uroot -p 3306 -e 'show database;' && echo 'ok' || echo 'work'"
+  register: result
+  until: result.stdout.find("ok") != -1
+  retries: 20
+  delay: 5
+  when: ansible_os_family == "RedHat"
+
+- name: Start mysql security script
+  shell: "/bin/bash /tmp/mysql_security.sh && echo 'ok' || echo 'work'"
+  register: run_result
+  until: run_result.stdout.find("ok") != -1
+  retries: 20
+  delay: 5
+  when: ansible_os_family == "RedHat"
+
+- name: 
